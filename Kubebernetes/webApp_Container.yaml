@@ -2,27 +2,35 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: dotnet-app
+  name: webApp-container
 ---
 # Deployment (.NET 10 Web API)
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: dotnet10-api
-  namespace: dotnet-app
+  name: webApp-container
+  namespace: webApp-container
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: dotnet10-api
+      app: webApp-container
   template:
     metadata:
       labels:
-        app: dotnet10-api
+        app: webApp-container
     spec:
       containers:
-      - name: dotnet10-api
-        image: mcr.microsoft.com/dotnet/aspnet:10.0-preview
+      - name: webApp-container
+        image: bitnami/dotnet-sdk:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
         ports:
         - containerPort: 8080
         env:
@@ -33,12 +41,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: dotnet10-service
-  namespace: dotnet-app
+  name: webApp-service
+  namespace: webApp-container
 spec:
   type: ClusterIP
   selector:
-    app: dotnet10-api
+    app: webApp-container
   ports:
   - port: 80
     targetPort: 8080
@@ -47,7 +55,7 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: dotnet10-ingress
+  name: webApp-ingress
   namespace: dotnet-app
   annotations:
     kubernetes.io/ingress.class: nginx
@@ -61,7 +69,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: dotnet10-service
+            name: webApp-service
             port:
               number: 80
 ---
@@ -69,12 +77,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: dotnet10-loadbalancer
-  namespace: dotnet-app
+  name: webApp-loadbalancer
+  namespace: webApp-container
 spec:
   type: LoadBalancer
   selector:
-    app: dotnet10-api
+    app: webApp-api
   ports:
   - port: 80
     targetPort: 8080
@@ -84,11 +92,11 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-http-only
-  namespace: dotnet-app
+  namespace: webApp-app
 spec:
   podSelector:
     matchLabels:
-      app: dotnet10-api
+      app: webApp-api
   policyTypes:
   - Ingress
   ingress:
@@ -103,14 +111,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: dotnet10-dns
-  namespace: dotnet-app
+  name: webApp-dns
+  namespace: webApp-container
   annotations:
     external-dns.alpha.kubernetes.io/hostname: api.example.com
 spec:
   type: LoadBalancer
   selector:
-    app: dotnet10-api
+    app: webApp-container
   ports:
   - port: 80
     targetPort: 8080
