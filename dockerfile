@@ -2,6 +2,10 @@ FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+WORKDIR /app
+
+RUN git clone --branch main --depth 1 https://github.com/Pshymonz/webappproj.git.
+
 # Base packages
 RUN apt-get update && apt-get install -y \
     ca-certificates \
@@ -115,3 +119,5 @@ EXPOSE 8080 9090
 # Start Supervisor
 # ----------------------------
 CMD ["/usr/bin/supervisord", "-n"]
+
+
