@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  devops-toolbox:
+    build: .
+    container_name: devops-toolbox
+    ports:
+      - "8080:8080"   # Jenkins
+      - "9090:9090"   # Prometheus
+    volumes:
+      - jenkins_home:/var/lib/jenkins
+      - prometheus_data:/var/lib/prometheus
+    restart: unless-stopped
+
+volumes:
+  jenkins_home:
+  prometheus_data:
