@@ -22,7 +22,7 @@ spec:
     spec:
       containers:
       - name: webApp-container
-        image: bitnami/dotnet-sdk:latest
+        image: bitnami/dotnet-sdk:sha256-20124455b4c2e41918b953419b20e5115c6d17386f17c8c3da253d9873886a31
         imagePullPolicy: Always
         resources:
           requests:
