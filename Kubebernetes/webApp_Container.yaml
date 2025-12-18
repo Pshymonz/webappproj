@@ -1,0 +1,116 @@
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dotnet-app
+---
+# Deployment (.NET 10 Web API)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dotnet10-api
+  namespace: dotnet-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: dotnet10-api
+  template:
+    metadata:
+      labels:
+        app: dotnet10-api
+    spec:
+      containers:
+      - name: dotnet10-api
+        image: mcr.microsoft.com/dotnet/aspnet:10.0-preview
+        ports:
+        - containerPort: 8080
+        env:
+        - name: ASPNETCORE_URLS
+          value: http://+:8080
+---
+# Internal Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: dotnet10-service
+  namespace: dotnet-app
+spec:
+  type: ClusterIP
+  selector:
+    app: dotnet10-api
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+# Ingress Controller (NGINX assumed installed)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dotnet10-ingress
+  namespace: dotnet-app
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: api.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: dotnet10-service
+            port:
+              number: 80
+---
+# LoadBalancer Service (Cloud Provider)
+apiVersion: v1
+kind: Service
+metadata:
+  name: dotnet10-loadbalancer
+  namespace: dotnet-app
+spec:
+  type: LoadBalancer
+  selector:
+    app: dotnet10-api
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+# NetworkPolicy acting as Firewall
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-http-only
+  namespace: dotnet-app
+spec:
+  podSelector:
+    matchLabels:
+      app: dotnet10-api
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+    ports:
+    - protocol: TCP
+      port: 8080
+---
+# External DNS (requires external-dns controller)
+apiVersion: v1
+kind: Service
+metadata:
+  name: dotnet10-dns
+  namespace: dotnet-app
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: api.example.com
+spec:
+  type: LoadBalancer
+  selector:
+    app: dotnet10-api
+  ports:
+  - port: 80
+    targetPort: 8080

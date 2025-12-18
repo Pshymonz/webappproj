@@ -18,3 +18,5 @@ Make sure you configure your "user.name" and "user.email" in git.
 
 git config --global user.name "Simon Teff"
 git config --global user.email "simon.teff@btinternet.com"
+
+docker pull bitnami/dotnet-sdk:sha256-20124455b4c2e41918b953419b20e5115c6d17386f17c8c3da253d9873886a31
