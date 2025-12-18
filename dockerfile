@@ -4,8 +4,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /app
 
-RUN git clone --branch main --depth 1 https://github.com/Pshymonz/webappproj.git.
-
 # Base packages
 RUN apt-get update && apt-get install -y \
     ca-certificates \
@@ -21,6 +19,9 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     supervisor \
     && rm -rf /var/lib/apt/lists/*
+
+# Download GitHub Clone.
+RUN git clone --branch main --depth 1 https://github.com/Pshymonz/webappproj.git  
 
 # ----------------------------
 # Ansible
