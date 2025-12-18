@@ -21,7 +21,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Download GitHub Clone.
-RUN git clone --branch main --depth 1 https://github.com/Pshymonz/webappproj.git
+RUN mkdir -p /app && \
+    git clone --branch main --depth 1 https://github.com/Pshymonz/webappproj.git
 
 # ----------------------------
 # Ansible
